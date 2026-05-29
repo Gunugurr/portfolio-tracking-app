@@ -165,6 +165,13 @@ export default function Page() {
 
   const portfolioSymbols = useMemo(() => new Set(holdings.map((h) => h.symbol)), [holdings]);
 
+  // Piyasa ekranında portföy hisselerinin fiyatı bazen eksik gelir (rate limit).
+  // quotes (portföy) fallback olarak kullanılır; marketQuotes mevcut ise önceliklidir.
+  const mergedMarketQuotes = useMemo(
+    () => ({ ...quotes, ...marketQuotes }),
+    [quotes, marketQuotes]
+  );
+
   const [marketStats, setMarketStats] = useState<{
     gainers: number; losers: number; unchanged: number; total: number;
   } | null>(null);
@@ -199,7 +206,7 @@ export default function Page() {
 
       {activeTab === "market" && (
         <MarketView
-          marketQuotes={marketQuotes}
+          marketQuotes={mergedMarketQuotes}
           loadingMarket={loadingMarket}
           onAddToPortfolio={handleAddFromMarket}
           portfolioSymbols={portfolioSymbols}
