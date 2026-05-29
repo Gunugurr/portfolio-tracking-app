@@ -74,16 +74,21 @@ export default function Page() {
     fetchQuotes(saved.map((h) => h.symbol));
 
     async function fetchMarket() {
-      const results = await Promise.all(
-        TOP_50.map(async (s) => {
-          try { return { symbol: s.symbol, q: await getQuote(s.symbol) }; }
-          catch { return { symbol: s.symbol, q: null }; }
-        })
-      );
-      const newQ: Record<string, Quote> = {};
-      results.forEach(({ symbol, q }) => { if (q) newQ[symbol] = q; });
-      setMarketQuotes(newQ);
-      setLoadingMarket(false);
+      const BATCH = 10;
+      const acc: Record<string, Quote> = {};
+      for (let i = 0; i < TOP_50.length; i += BATCH) {
+        const slice = TOP_50.slice(i, i + BATCH);
+        const results = await Promise.all(
+          slice.map(async (s) => {
+            try { return { symbol: s.symbol, q: await getQuote(s.symbol) }; }
+            catch { return { symbol: s.symbol, q: null }; }
+          })
+        );
+        results.forEach(({ symbol, q }) => { if (q) acc[symbol] = q; });
+        setMarketQuotes({ ...acc });
+        if (i === 0) setLoadingMarket(false);
+        if (i + BATCH < TOP_50.length) await new Promise(r => setTimeout(r, 250));
+      }
     }
     fetchMarket();
   }, []);

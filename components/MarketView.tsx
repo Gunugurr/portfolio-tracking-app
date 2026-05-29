@@ -178,7 +178,8 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
         >
           <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
             <colgroup>
-              <col style={{ width: 100 }} />
+              <col style={{ width: 42 }} />
+              <col style={{ width: 95 }} />
               <col style={{ width: "40%" }} />
               <col style={{ width: 120 }} />
               <col style={{ width: 95 }} />
@@ -186,6 +187,7 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
             </colgroup>
             <thead>
               <tr style={{ background: "var(--color-bg-2)", borderBottom: "1px solid var(--color-line)" }}>
+                <th className="text-center px-2 py-3 font-medium" style={{ color: "var(--color-text-3)" }}>#</th>
                 <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>Sembol</th>
                 <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>Şirket</th>
                 <th className="text-right px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>Fiyat</th>
@@ -197,14 +199,15 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
               {isLoadingRows
                 ? Array.from({ length: PAGE_SIZE }).map((_, i) => (
                     <tr key={i} style={{ height: 52, borderTop: i > 0 ? "1px solid var(--color-line)" : undefined, background: "var(--color-bg)" }}>
-                      {[160, 200, 80, 70, 100].map((w, j) => (
-                        <td key={j} className="px-4">
-                          <div className="rounded animate-pulse" style={{ height: 14, width: w, background: "var(--color-bg-3)" }} />
+                      {[28, 60, 200, 80, 70, 100].map((w, j) => (
+                        <td key={j} className="px-2">
+                          <div className="rounded animate-pulse mx-auto" style={{ height: 14, width: w, background: "var(--color-bg-3)" }} />
                         </td>
                       ))}
                     </tr>
                   ))
                 : activeRows.map((r, i) => {
+                    const rank = isSearching ? i + 1 : page * PAGE_SIZE + i + 1;
                     const q = activeQuotes[r.symbol];
                     const isLoadingQ = loadingSearchQuotes.has(r.symbol);
                     const inPortfolio = portfolioSymbols.has(r.symbol);
@@ -218,6 +221,9 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
                         onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-bg-2)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-bg)")}
                       >
+                        <td className="px-2 text-center font-mono text-xs" style={{ color: "var(--color-text-3)" }}>
+                          {rank}
+                        </td>
                         <td className="px-4 font-mono font-semibold" style={{ color: "var(--color-orange)" }}>
                           {r.symbol}
                         </td>
