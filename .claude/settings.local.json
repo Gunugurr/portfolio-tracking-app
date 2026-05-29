@@ -7,7 +7,10 @@
       "Bash(curl *)",
       "Bash(npm run *)",
       "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
-      "PowerShell(taskkill *)"
+      "PowerShell(taskkill *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

@@ -22,26 +22,15 @@ interface HeaderProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
   marketStats: MarketStats | null;
-  countdown: number;
-  refreshFlash: boolean;
 }
 
-export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, onTabChange, marketStats, countdown, refreshFlash }: HeaderProps) {
+export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, onTabChange, marketStats }: HeaderProps) {
   const { s } = useLanguage();
   return (
     <div>
       <div className="flex items-center justify-between py-5">
         <Brand size="lg" />
         <div className="flex items-center gap-2">
-          <span
-            className="text-xs font-mono tabular-nums px-2 py-0.5 rounded transition-all duration-300"
-            style={{
-              color: refreshFlash ? "#1a1a1a" : "var(--color-text-3)",
-              background: refreshFlash ? "var(--color-green)" : "transparent",
-            }}
-          >
-            ↻ {countdown}s
-          </span>
           {activeTab === "portfolio" && (
             <>
               {lastUpdated && (

@@ -36,9 +36,6 @@ export default function Page() {
   const [marketQuotes, setMarketQuotes] = useState<Record<string, Quote>>({});
   const [loadingMarket, setLoadingMarket] = useState(true);
 
-  // Otomatik yenileme countdown (saniye)
-  const [countdown, setCountdown] = useState(60);
-  const [refreshFlash, setRefreshFlash] = useState(false);
 
   // Fiyat alarmları
   const [alerts, setAlerts] = useState<Record<string, number>>({});
@@ -168,19 +165,16 @@ export default function Page() {
     if (syms.length > 0) fetchQuotes(syms);
     fetchMarketSilent();
     fetchMarketBreadth();
-    setRefreshFlash(true);
-    setTimeout(() => setRefreshFlash(false), 1500);
   };
 
   useEffect(() => {
+    let tick = 0;
     const timer = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          setTimeout(() => autoRefreshRef.current(), 0);
-          return 60;
-        }
-        return c - 1;
-      });
+      tick += 1;
+      if (tick >= 60) {
+        tick = 0;
+        autoRefreshRef.current();
+      }
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -227,7 +221,6 @@ export default function Page() {
   }
 
   function handleRefresh() {
-    setCountdown(60);
     setIsRefreshing(true);
     fetchMarketBreadth();
     fetchQuotes(holdings.map((h) => h.symbol)).catch(() => {
@@ -308,8 +301,6 @@ export default function Page() {
           activeTab={activeTab}
           onTabChange={setActiveTab}
           marketStats={marketStats}
-          countdown={countdown}
-          refreshFlash={refreshFlash}
         />
 
         {/* Alarm bildirimleri */}

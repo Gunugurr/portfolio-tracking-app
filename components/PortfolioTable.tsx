@@ -55,11 +55,11 @@ export default function PortfolioTable({ rows, alerts, onSetAlert, onRemove, onS
         className={`${GRID} px-4 py-2 border-b`}
         style={{ borderColor: "var(--color-line)" }}
       >
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colStock}</span>
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colBuyPrice}</span>
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colCurrentPrice}</span>
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colQty}</span>
-        <span className="text-xs uppercase tracking-wider text-right" style={{ color: "var(--color-text-3)" }}>{s.colPosition}</span>
+        <span className="text-xs uppercase tracking-wider truncate" style={{ color: "var(--color-text-3)" }}>{s.colStock}</span>
+        <span className="text-xs uppercase tracking-wider truncate" style={{ color: "var(--color-text-3)" }}>{s.colBuyPrice}</span>
+        <span className="text-xs uppercase tracking-wider truncate" style={{ color: "var(--color-text-3)" }}>{s.colCurrentPrice}</span>
+        <span className="text-xs uppercase tracking-wider truncate" style={{ color: "var(--color-text-3)" }}>{s.colQty}</span>
+        <span className="text-xs uppercase tracking-wider text-right truncate" style={{ color: "var(--color-text-3)" }}>{s.colPosition}</span>
         <span className="text-xs uppercase tracking-wider text-right" style={{ color: "var(--color-text-3)" }}>P&L</span>
         <span className="text-xs text-center" style={{ color: "var(--color-text-3)" }}>🔔</span>
         <span />
