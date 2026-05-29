@@ -179,25 +179,25 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
       {(isLoadingRows || activeRows.length > 0) && (
         <div
           className="rounded-lg overflow-hidden"
-          style={{ border: "1px solid var(--color-line)", height: 565 }}
+          style={{ border: "1px solid var(--color-line)", height: "clamp(360px, 60vh, 565px)" }}
         >
           <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
             <colgroup>
-              <col style={{ width: 42 }} />
-              <col style={{ width: 95 }} />
-              <col style={{ width: "40%" }} />
+              <col className="hidden sm:table-column" style={{ width: 42 }} />
+              <col style={{ width: 90 }} />
+              <col className="hidden sm:table-column" style={{ width: "35%" }} />
+              <col style={{ width: 110 }} />
+              <col style={{ width: 90 }} />
               <col style={{ width: 120 }} />
-              <col style={{ width: 95 }} />
-              <col style={{ width: 155 }} />
             </colgroup>
             <thead>
               <tr style={{ background: "var(--color-bg-2)", borderBottom: "1px solid var(--color-line)" }}>
-                <th className="text-center px-2 py-3 font-medium" style={{ color: "var(--color-text-3)" }}>#</th>
-                <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colSymbol}</th>
-                <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colCompany}</th>
-                <th className="text-right px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colPrice}</th>
-                <th className="text-right px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colChange}</th>
-                <th className="px-4 py-3 text-right font-medium" style={{ color: "var(--color-text-2)" }}>{s.colAction}</th>
+                <th className="hidden sm:table-cell text-center px-2 py-3 font-medium" style={{ color: "var(--color-text-3)" }}>#</th>
+                <th className="text-left px-3 md:px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colSymbol}</th>
+                <th className="hidden sm:table-cell text-left px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colCompany}</th>
+                <th className="text-right px-3 md:px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colPrice}</th>
+                <th className="text-right px-3 md:px-4 py-3 font-medium" style={{ color: "var(--color-text-2)" }}>{s.colChange}</th>
+                <th className="px-3 md:px-4 py-3 text-right font-medium" style={{ color: "var(--color-text-2)" }}>{s.colAction}</th>
               </tr>
             </thead>
             <tbody>
@@ -226,16 +226,16 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
                         onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-bg-2)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-bg)")}
                       >
-                        <td className="px-2 text-center font-mono text-xs" style={{ color: "var(--color-text-3)" }}>
+                        <td className="hidden sm:table-cell px-2 text-center font-mono text-xs" style={{ color: "var(--color-text-3)" }}>
                           {rank}
                         </td>
-                        <td className="px-4 font-mono font-semibold" style={{ color: "var(--color-orange)" }}>
+                        <td className="px-3 md:px-4 font-mono font-semibold" style={{ color: "var(--color-orange)" }}>
                           {r.symbol}
                         </td>
-                        <td className="px-4 truncate" style={{ color: "var(--color-text)", maxWidth: 0 }}>
+                        <td className="hidden sm:table-cell px-4 truncate" style={{ color: "var(--color-text)", maxWidth: 0 }}>
                           {r.description}
                         </td>
-                        <td className="px-4 text-right font-mono" style={{ color: "var(--color-text)" }}>
+                        <td className="px-3 md:px-4 text-right font-mono" style={{ color: "var(--color-text)" }}>
                           {isLoadingQ ? (
                             <span className="animate-pulse" style={{ color: "var(--color-text-2)" }}>...</span>
                           ) : q ? (
@@ -246,25 +246,22 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
                             <span style={{ color: "var(--color-text-2)" }}>-</span>
                           )}
                         </td>
-                        <td className="px-4 text-right font-mono">
+                        <td className="px-3 md:px-4 text-right font-mono">
                           {isLoadingQ ? (
                             <span className="animate-pulse" style={{ color: "var(--color-text-2)" }}>...</span>
                           ) : q ? (
-                            <FlashNumber
-                              value={q.dp}
-                              style={{ color: positive ? "var(--color-green)" : "var(--color-red)" }}
-                            >
+                            <FlashNumber value={q.dp} style={{ color: positive ? "var(--color-green)" : "var(--color-red)" }}>
                               {formatPercent(q.dp)}
                             </FlashNumber>
                           ) : (
                             <span style={{ color: "var(--color-text-2)" }}>-</span>
                           )}
                         </td>
-                        <td className="px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="px-2 md:px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={(e) => { e.stopPropagation(); setSelectedStock({ symbol: r.symbol, name: r.description }); }}
-                              className="px-2.5 py-1 rounded text-xs font-medium border transition-opacity hover:opacity-70"
+                              className="hidden md:inline-flex px-2.5 py-1 rounded text-xs font-medium border transition-opacity hover:opacity-70"
                               style={{ color: "var(--color-text-2)", border: "1px solid var(--color-line)", background: "var(--color-bg-3)" }}
                             >
                               {s.chart}
@@ -278,7 +275,7 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
                                 border: inPortfolio ? "1px solid var(--color-orange)" : "none",
                               }}
                             >
-                              {inPortfolio ? s.inPortfolio : s.add}
+                              {inPortfolio ? "↗" : s.add}
                             </button>
                           </div>
                         </td>

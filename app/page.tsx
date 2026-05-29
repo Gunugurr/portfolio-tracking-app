@@ -293,7 +293,7 @@ export default function Page() {
   return (
     <>
       <TickerBand quotes={marketQuotes} loading={loadingMarket} />
-      <main className="max-w-5xl mx-auto px-6 py-8 md:px-12 md:py-12 flex flex-col gap-6 flex-1 w-full">
+      <main className="max-w-5xl mx-auto px-4 py-5 md:px-12 md:py-12 flex flex-col gap-4 md:gap-6 flex-1 w-full">
         <Header
           lastUpdated={lastUpdated}
           onRefresh={handleRefresh}
@@ -312,9 +312,9 @@ export default function Page() {
                 className="flex items-center justify-between px-4 py-3 rounded-lg"
                 style={{ background: "var(--color-orange)", color: "#1a1a1a" }}
               >
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <span>🔔</span>
-                  <span>{tFmt(s.alertBanner, { sym: b.symbol, target: formatCurrency(b.target), price: formatCurrency(b.price) })}</span>
+                <div className="flex items-center gap-2 text-xs md:text-sm font-medium min-w-0">
+                  <span className="shrink-0">🔔</span>
+                  <span className="truncate">{tFmt(s.alertBanner, { sym: b.symbol, target: formatCurrency(b.target), price: formatCurrency(b.price) })}</span>
                 </div>
                 <button
                   onClick={() => setAlertBanners((prev) => prev.filter((_, idx) => idx !== i))}
@@ -376,7 +376,7 @@ export default function Page() {
 
         {toast && (
           <div
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-md text-sm font-medium"
+            className="fixed bottom-4 left-4 right-4 md:left-1/2 md:right-auto md:bottom-6 md:-translate-x-1/2 px-4 py-2 rounded-md text-sm font-medium text-center"
             style={{ background: "var(--color-bg-3)", color: "var(--color-text)", border: "1px solid var(--color-line)" }}
           >
             {toast}

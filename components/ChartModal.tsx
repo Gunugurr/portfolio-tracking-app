@@ -17,25 +17,30 @@ const DEFAULT_H = 500;
 export default function ChartModal({ symbol, name, onClose }: ChartModalProps) {
   const { s } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  // Başlangıç pozisyonu: ekran ortası
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setPos({
-      x: Math.max(0, (window.innerWidth - DEFAULT_W) / 2),
-      y: Math.max(0, (window.innerHeight - DEFAULT_H) / 2),
-    });
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
+
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    if (!isMobile) {
+      setPos({
+        x: Math.max(0, (window.innerWidth - DEFAULT_W) / 2),
+        y: Math.max(0, (window.innerHeight - DEFAULT_H) / 2),
+      });
+    }
+  }, [isMobile]);
+
   const [size, setSize] = useState({ w: DEFAULT_W, h: DEFAULT_H });
 
-  // Drag state
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
-  // Resize state
   const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
 
-  // ESC ile kapat
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -44,7 +49,6 @@ export default function ChartModal({ symbol, name, onClose }: ChartModalProps) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  // TradingView widget inject
   useEffect(() => {
     if (!containerRef.current) return;
     containerRef.current.innerHTML = "";
@@ -56,7 +60,6 @@ export default function ChartModal({ symbol, name, onClose }: ChartModalProps) {
     containerRef.current.appendChild(widgetDiv);
 
     const isLight = document.documentElement.getAttribute("data-theme") === "light";
-
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.async = true;
@@ -76,114 +79,86 @@ export default function ChartModal({ symbol, name, onClose }: ChartModalProps) {
       calendar: false,
     });
     containerRef.current.appendChild(script);
-
-    return () => {
-      if (containerRef.current) containerRef.current.innerHTML = "";
-    };
+    return () => { if (containerRef.current) containerRef.current.innerHTML = ""; };
   }, [symbol]);
 
-  // --- Drag ---
   function onDragStart(e: React.MouseEvent) {
+    if (isMobile) return;
     e.preventDefault();
     dragRef.current = { startX: e.clientX, startY: e.clientY, startPosX: pos.x, startPosY: pos.y };
-
     function onMove(ev: MouseEvent) {
       if (!dragRef.current) return;
-      const dx = ev.clientX - dragRef.current.startX;
-      const dy = ev.clientY - dragRef.current.startY;
       setPos({
-        x: Math.max(0, dragRef.current.startPosX + dx),
-        y: Math.max(0, dragRef.current.startPosY + dy),
+        x: Math.max(0, dragRef.current.startPosX + ev.clientX - dragRef.current.startX),
+        y: Math.max(0, dragRef.current.startPosY + ev.clientY - dragRef.current.startY),
       });
     }
-    function onUp() {
-      dragRef.current = null;
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-    }
+    function onUp() { dragRef.current = null; document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); }
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
   }
 
-  // --- Resize ---
   function onResizeStart(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
+    if (isMobile) return;
+    e.preventDefault(); e.stopPropagation();
     resizeRef.current = { startX: e.clientX, startY: e.clientY, startW: size.w, startH: size.h };
-
     function onMove(ev: MouseEvent) {
       if (!resizeRef.current) return;
-      const dw = ev.clientX - resizeRef.current.startX;
-      const dh = ev.clientY - resizeRef.current.startY;
       setSize({
-        w: Math.max(MIN_W, resizeRef.current.startW + dw),
-        h: Math.max(MIN_H, resizeRef.current.startH + dh),
+        w: Math.max(MIN_W, resizeRef.current.startW + ev.clientX - resizeRef.current.startX),
+        h: Math.max(MIN_H, resizeRef.current.startH + ev.clientY - resizeRef.current.startY),
       });
     }
-    function onUp() {
-      resizeRef.current = null;
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-    }
+    function onUp() { resizeRef.current = null; document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); }
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
   }
+
+  const modalStyle = isMobile
+    ? { left: 0, top: 0, width: "100dvw", height: "100dvh" }
+    : { left: pos.x, top: pos.y, width: size.w, height: size.h, minWidth: MIN_W, minHeight: MIN_H };
 
   return (
     <div
-      ref={modalRef}
-      className="fixed z-50 flex flex-col rounded-lg border overflow-hidden shadow-2xl"
-      style={{
-        left: pos.x,
-        top: pos.y,
-        width: size.w,
-        height: size.h,
-        background: "var(--color-bg-2)",
-        borderColor: "var(--color-line)",
-        minWidth: MIN_W,
-        minHeight: MIN_H,
-      }}
+      className={`fixed z-50 flex flex-col border overflow-hidden shadow-2xl ${isMobile ? "rounded-none" : "rounded-lg"}`}
+      style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)", ...modalStyle }}
     >
-      {/* Başlık — sürükleme alanı */}
+      {/* Başlık */}
       <div
-        className="flex items-center justify-between px-5 py-3 border-b shrink-0 select-none"
-        style={{ borderColor: "var(--color-line)", cursor: "grab" }}
-        onMouseDown={onDragStart}
+        className="flex items-center justify-between px-4 py-3 border-b shrink-0 select-none"
+        style={{ borderColor: "var(--color-line)", cursor: isMobile ? "default" : "grab" }}
+        onMouseDown={isMobile ? undefined : onDragStart}
       >
-        <div className="flex items-center gap-3">
-          <span className="font-mono font-bold text-sm" style={{ color: "var(--color-accent)" }}>
-            {symbol}
-          </span>
-          <span className="text-sm" style={{ color: "var(--color-text-2)" }}>
-            {name}
-          </span>
-          <span className="text-xs ml-2 hidden sm:inline" style={{ color: "var(--color-text-3)" }}>
-            {s.dragHint}
-          </span>
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="font-mono font-bold text-sm shrink-0" style={{ color: "var(--color-accent)" }}>{symbol}</span>
+          <span className="text-sm truncate" style={{ color: "var(--color-text-2)" }}>{name}</span>
+          {!isMobile && (
+            <span className="text-xs ml-2 hidden sm:inline" style={{ color: "var(--color-text-3)" }}>
+              {s.dragHint}
+            </span>
+          )}
         </div>
         <button
           onMouseDown={(e) => e.stopPropagation()}
           onClick={onClose}
-          className="px-2 py-1 rounded text-sm transition-colors hover:bg-white/[0.05]"
+          className="px-2.5 py-1.5 rounded text-sm transition-colors hover:bg-white/[0.05] shrink-0"
           style={{ color: "var(--color-text-3)" }}
         >
           ✕
         </button>
       </div>
 
-      {/* Chart */}
       <div ref={containerRef} className="tradingview-widget-container flex-1 w-full overflow-hidden" />
 
-      {/* Resize tutacağı — sağ alt köşe */}
-      <div
-        onMouseDown={onResizeStart}
-        className="absolute bottom-0 right-0 w-5 h-5 flex items-end justify-end pr-1 pb-1"
-        style={{ cursor: "se-resize" }}
-      >
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-          <path d="M2 9 L9 2 M5 9 L9 5 M9 9 L9 9" stroke="var(--color-text-3)" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
-      </div>
+      {!isMobile && (
+        <div onMouseDown={onResizeStart}
+          className="absolute bottom-0 right-0 w-5 h-5 flex items-end justify-end pr-1 pb-1"
+          style={{ cursor: "se-resize" }}>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 9 L9 2 M5 9 L9 5 M9 9 L9 9" stroke="var(--color-text-3)" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }

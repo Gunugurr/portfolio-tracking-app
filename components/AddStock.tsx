@@ -116,7 +116,7 @@ export default function AddStock({ onAdd, isLoading }: AddStockProps) {
 
           {showDropdown && ticker.length > 0 && (
             <div
-              className="absolute z-50 top-full mt-1 left-0 w-72 rounded-md border overflow-hidden shadow-lg"
+              className="absolute z-50 top-full mt-1 left-0 right-0 md:right-auto md:w-72 rounded-md border overflow-hidden shadow-lg"
               style={{ background: "var(--color-bg-3)", borderColor: "var(--color-line)" }}
             >
               {searching ? (
@@ -176,7 +176,7 @@ export default function AddStock({ onAdd, isLoading }: AddStockProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="px-5 py-2 rounded-md text-sm font-bold transition-opacity disabled:opacity-40"
+          className="w-full md:w-auto px-5 py-2 rounded-md text-sm font-bold transition-opacity disabled:opacity-40"
           style={{ background: "var(--color-accent)", color: "#fff" }}
         >
           {isLoading ? s.adding : s.addBtn}
