@@ -18,14 +18,18 @@ interface HeaderProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
   marketStats: MarketStats | null;
+  countdown: number;
 }
 
-export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, onTabChange, marketStats }: HeaderProps) {
+export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, onTabChange, marketStats, countdown }: HeaderProps) {
   return (
     <div>
       <div className="flex items-center justify-between py-5">
         <Brand size="lg" />
         <div className="flex items-center gap-2">
+          <span className="text-xs font-mono tabular-nums" style={{ color: "var(--color-text-3)" }}>
+            ↻ {countdown}s
+          </span>
           {activeTab === "portfolio" && (
             <>
               {lastUpdated && (

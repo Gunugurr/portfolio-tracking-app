@@ -8,6 +8,7 @@ import { TOP_50 } from "@/lib/market";
 
 const PAGE_SIZE = 10;
 import ChartModal from "@/components/ChartModal";
+import WinnerLoser from "@/components/WinnerLoser";
 
 interface AddModal {
   symbol: string;
@@ -103,6 +104,7 @@ export default function MarketView({ marketQuotes, loadingMarket, onAddToPortfol
 
   return (
     <div className="flex flex-col gap-4">
+      <WinnerLoser marketQuotes={marketQuotes} loading={loadingMarket} />
       {/* Arama */}
       <div className="relative">
         <input

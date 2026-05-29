@@ -1,7 +1,9 @@
-import StockRow, { StockRowData } from "./StockRow";
+import StockRow, { StockRowData, GRID } from "./StockRow";
 
 interface PortfolioTableProps {
   rows: StockRowData[];
+  alerts: Record<string, number>;
+  onSetAlert: (symbol: string, price: number | null) => void;
   onRemove: (symbol: string) => void;
   onSelect: (symbol: string, name: string) => void;
   isInitialLoading: boolean;
@@ -20,13 +22,10 @@ function SkeletonRow() {
   );
 }
 
-export default function PortfolioTable({ rows, onRemove, onSelect, isInitialLoading }: PortfolioTableProps) {
+export default function PortfolioTable({ rows, alerts, onSetAlert, onRemove, onSelect, isInitialLoading }: PortfolioTableProps) {
   if (isInitialLoading) {
     return (
-      <div
-        className="rounded-lg border overflow-hidden"
-        style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}
-      >
+      <div className="rounded-lg border overflow-hidden" style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}>
         <SkeletonRow />
         <SkeletonRow />
         <SkeletonRow />
@@ -36,10 +35,7 @@ export default function PortfolioTable({ rows, onRemove, onSelect, isInitialLoad
 
   if (rows.length === 0) {
     return (
-      <div
-        className="rounded-lg border p-10 text-center"
-        style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}
-      >
+      <div className="rounded-lg border p-10 text-center" style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}>
         <p style={{ color: "var(--color-text-2)" }}>
           Henüz hisse eklemedin.{" "}
           <span style={{ color: "var(--color-accent)" }}>AAPL</span> gibi bir sembol ekle.
@@ -49,13 +45,10 @@ export default function PortfolioTable({ rows, onRemove, onSelect, isInitialLoad
   }
 
   return (
-    <div
-      className="rounded-lg border overflow-hidden"
-      style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}
-    >
+    <div className="rounded-lg border overflow-hidden" style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}>
       {/* Sütun başlıkları */}
       <div
-        className="grid grid-cols-[160px_110px_110px_70px_110px_110px_32px] items-center gap-3 px-4 py-2 border-b"
+        className={`${GRID} px-4 py-2 border-b`}
         style={{ borderColor: "var(--color-line)" }}
       >
         <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>Hisse</span>
@@ -64,11 +57,19 @@ export default function PortfolioTable({ rows, onRemove, onSelect, isInitialLoad
         <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>Adet</span>
         <span className="text-xs uppercase tracking-wider text-right" style={{ color: "var(--color-text-3)" }}>Pozisyon</span>
         <span className="text-xs uppercase tracking-wider text-right" style={{ color: "var(--color-text-3)" }}>P&L</span>
+        <span className="text-xs text-center" style={{ color: "var(--color-text-3)" }}>🔔</span>
         <span />
       </div>
 
       {rows.map((row) => (
-        <StockRow key={row.symbol} data={row} onRemove={onRemove} onSelect={onSelect} />
+        <StockRow
+          key={row.symbol}
+          data={row}
+          alertTarget={alerts[row.symbol]}
+          onSetAlert={onSetAlert}
+          onRemove={onRemove}
+          onSelect={onSelect}
+        />
       ))}
     </div>
   );
