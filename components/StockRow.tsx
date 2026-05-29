@@ -141,7 +141,7 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
         {/* Alarm */}
         <button
           onClick={openAlertModal}
-          className="opacity-0 group-hover:opacity-100 transition-opacity px-1 py-1 rounded justify-self-center"
+          className={`w-full flex justify-center items-center transition-opacity py-1 rounded ${alertTarget ? "" : "opacity-0 group-hover:opacity-100"}`}
           style={{ color: alertTarget ? "var(--color-orange)" : "var(--color-text-3)" }}
           title={alertTarget ? `Alarm: ${formatCurrency(alertTarget)}` : "Fiyat alarmı ekle"}
         >

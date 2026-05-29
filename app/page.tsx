@@ -35,6 +35,7 @@ export default function Page() {
 
   // Otomatik yenileme countdown (saniye)
   const [countdown, setCountdown] = useState(60);
+  const [refreshFlash, setRefreshFlash] = useState(false);
 
   // Fiyat alarmları
   const [alerts, setAlerts] = useState<Record<string, number>>({});
@@ -164,6 +165,8 @@ export default function Page() {
     if (syms.length > 0) fetchQuotes(syms);
     fetchMarketSilent();
     fetchMarketBreadth();
+    setRefreshFlash(true);
+    setTimeout(() => setRefreshFlash(false), 1500);
   };
 
   useEffect(() => {
@@ -303,6 +306,7 @@ export default function Page() {
           onTabChange={setActiveTab}
           marketStats={marketStats}
           countdown={countdown}
+          refreshFlash={refreshFlash}
         />
 
         {/* Alarm bildirimleri */}
