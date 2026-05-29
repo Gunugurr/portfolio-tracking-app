@@ -1,6 +1,9 @@
+"use client";
+
 import { Quote } from "@/lib/finnhub";
 import { TOP_50 } from "@/lib/market";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Props {
   marketQuotes: Record<string, Quote>;
@@ -11,15 +14,16 @@ function Card({
   symbol,
   quote,
   type,
+  label,
 }: {
   symbol: string;
   quote: Quote;
   type: "winner" | "loser";
+  label: string;
 }) {
   const isWinner = type === "winner";
   const color = isWinner ? "var(--color-green)" : "var(--color-red)";
   const icon = isWinner ? "🚀" : "🔻";
-  const label = isWinner ? "Günün Yıldızı" : "Günün Kaybedeni";
   const fullName = TOP_50.find((s) => s.symbol === symbol)?.description ?? symbol;
   const name = fullName.length > 22 ? fullName.slice(0, 20) + "…" : fullName;
 
@@ -75,6 +79,7 @@ function Card({
 }
 
 export default function WinnerLoser({ marketQuotes, loading }: Props) {
+  const { s } = useLanguage();
   if (loading) return null;
 
   const entries = Object.entries(marketQuotes).filter(([, q]) => q.c > 0 && q.dp !== 0);
@@ -86,8 +91,8 @@ export default function WinnerLoser({ marketQuotes, loading }: Props) {
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Card symbol={winnerSym} quote={winnerQ} type="winner" />
-      <Card symbol={loserSym} quote={loserQ} type="loser" />
+      <Card symbol={winnerSym} quote={winnerQ} type="winner" label={s.topGainer} />
+      <Card symbol={loserSym} quote={loserQ} type="loser" label={s.topLoser} />
     </div>
   );
 }

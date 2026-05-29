@@ -15,10 +15,13 @@ import { getHoldings, addHolding, removeHolding, Holding } from "@/lib/storage";
 import { getAlerts, persistAlerts } from "@/lib/alerts";
 import { formatCurrency, formatPercent } from "@/lib/utils";
 import { TOP_50 } from "@/lib/market";
+import { useLanguage } from "@/lib/LanguageContext";
+import { tFmt } from "@/lib/i18n";
 
 type Tab = "market" | "portfolio";
 
 export default function Page() {
+  const { s } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>("market");
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
@@ -150,8 +153,8 @@ export default function Page() {
       setAlertBanners((prev) => [...prev, ...triggered]);
       triggered.forEach(({ symbol, price, target }) => {
         if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-          new Notification(`${symbol} hedefe ulaştı!`, {
-            body: `Hedef: ${formatCurrency(target)} → Şu an: ${formatCurrency(price)}`,
+          new Notification(tFmt(s.alertNotifTitle, { sym: symbol }), {
+            body: tFmt(s.alertNotifBody, { target: formatCurrency(target), price: formatCurrency(price) }),
           });
         }
       });
@@ -214,7 +217,7 @@ export default function Page() {
     setHoldings(updated);
     setQuotes((prev) => ({ ...prev, [symbol]: quote }));
     setQuoteErrors((prev) => { const next = { ...prev }; delete next[symbol]; return next; });
-    showToast(`${symbol} portföye eklendi.`);
+    showToast(tFmt(s.addedToPortfolio, { sym: symbol }));
   }
 
   function handleRemove(symbol: string) {
@@ -228,7 +231,7 @@ export default function Page() {
     setIsRefreshing(true);
     fetchMarketBreadth();
     fetchQuotes(holdings.map((h) => h.symbol)).catch(() => {
-      showToast("Veri çekilemedi, tekrar dene.");
+      showToast(s.fetchError);
       setIsRefreshing(false);
     });
   }
@@ -320,8 +323,7 @@ export default function Page() {
               >
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <span>🔔</span>
-                  <span className="font-bold">{b.symbol}</span>
-                  <span>hedef fiyata ulaştı! Hedef: {formatCurrency(b.target)} → Şu an: {formatCurrency(b.price)}</span>
+                  <span>{tFmt(s.alertBanner, { sym: b.symbol, target: formatCurrency(b.target), price: formatCurrency(b.price) })}</span>
                 </div>
                 <button
                   onClick={() => setAlertBanners((prev) => prev.filter((_, idx) => idx !== i))}
@@ -347,15 +349,15 @@ export default function Page() {
         {activeTab === "portfolio" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <SummaryCard label="Toplam Değer" value={formatCurrency(summary.totalValue)} />
+              <SummaryCard label={s.totalValue} value={formatCurrency(summary.totalValue)} />
               <SummaryCard
-                label="Gunluk Degisim"
+                label={s.dailyChange}
                 value={formatCurrency(Math.abs(summary.dailyDelta))}
                 delta={formatPercent(summary.dailyDeltaPct)}
                 deltaPositive={summary.dailyDelta >= 0}
               />
               <SummaryCard
-                label="Toplam P&L"
+                label={s.totalPnl}
                 value={formatCurrency(Math.abs(summary.totalPnl))}
                 delta={formatPercent(summary.totalPnlPct)}
                 deltaPositive={summary.totalPnl >= 0}

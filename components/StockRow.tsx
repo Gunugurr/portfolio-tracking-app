@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
+import { tFmt } from "@/lib/i18n";
 import FlashNumber from "@/components/FlashNumber";
 
 export interface StockRowData {
@@ -46,6 +48,7 @@ function BellIcon({ active }: { active: boolean }) {
 }
 
 export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSelect }: StockRowProps) {
+  const { s } = useLanguage();
   const { symbol, name, qty, buyPrice, currentPrice, change, changePercent, isLoading, error } = data;
 
   const [showAlertModal, setShowAlertModal] = useState(false);
@@ -108,7 +111,7 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
                 className="font-mono text-xs"
                 style={{ color: changePositive ? "var(--color-green)" : "var(--color-red)" }}
               >
-                {`${formatPercent(changePercent)} bugün`}
+                {`${formatPercent(changePercent)} ${s.today}`}
               </FlashNumber>
             </>
           )}
@@ -143,7 +146,7 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
           onClick={openAlertModal}
           className={`w-full flex justify-center items-center transition-opacity py-1 rounded ${alertTarget ? "" : "opacity-0 group-hover:opacity-100"}`}
           style={{ color: alertTarget ? "var(--color-orange)" : "var(--color-text-3)" }}
-          title={alertTarget ? `Alarm: ${formatCurrency(alertTarget)}` : "Fiyat alarmı ekle"}
+          title={alertTarget ? tFmt(s.alertTooltipActive, { price: formatCurrency(alertTarget) }) : s.alertTooltipAdd}
         >
           <BellIcon active={!!alertTarget} />
         </button>
@@ -153,7 +156,7 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
           onClick={(e) => { e.stopPropagation(); onRemove(symbol); }}
           className="opacity-0 group-hover:opacity-100 transition-opacity px-1 py-1 rounded text-xs justify-self-center"
           style={{ color: "var(--color-text-3)" }}
-          title="Sil"
+          title={s.remove}
         >
           ✕
         </button>
@@ -174,16 +177,16 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
             <div>
               <div className="flex items-center gap-2 font-semibold text-base" style={{ color: "var(--color-text)" }}>
                 <BellIcon active={!!alertTarget} />
-                <span>{symbol} Fiyat Alarmı</span>
+                <span>{symbol} {s.alertTitle}</span>
               </div>
               <p className="text-xs mt-1" style={{ color: "var(--color-text-3)" }}>
-                Fiyat bu seviyeye ulaştığında bildirim gönderilir.
+                {s.alertDesc}
               </p>
             </div>
 
             <div>
               <label className="text-xs font-medium mb-1 block" style={{ color: "var(--color-text-2)" }}>
-                Hedef Fiyat ($)
+                {s.targetPrice}
               </label>
               <input
                 type="number"
@@ -208,7 +211,7 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
                 className="flex-1 py-2 rounded-md text-sm font-medium"
                 style={{ background: "var(--color-bg-3)", color: "var(--color-text-2)", border: "1px solid var(--color-line)" }}
               >
-                İptal
+                {s.cancel}
               </button>
               {alertTarget && (
                 <button
@@ -216,7 +219,7 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
                   className="py-2 px-3 rounded-md text-sm font-medium"
                   style={{ color: "var(--color-red)", border: "1px solid var(--color-red)", background: "transparent" }}
                 >
-                  Kaldır
+                  {s.remove}
                 </button>
               )}
               <button
@@ -225,7 +228,7 @@ export default function StockRow({ data, alertTarget, onSetAlert, onRemove, onSe
                 className="flex-1 py-2 rounded-md text-sm font-semibold disabled:opacity-40"
                 style={{ background: "var(--color-orange)", color: "#1a1a1a" }}
               >
-                Kaydet
+                {s.save}
               </button>
             </div>
           </div>

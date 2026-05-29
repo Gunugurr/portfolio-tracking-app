@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/lib/LanguageContext";
 import StockRow, { StockRowData, GRID } from "./StockRow";
 
 interface PortfolioTableProps {
@@ -23,6 +26,8 @@ function SkeletonRow() {
 }
 
 export default function PortfolioTable({ rows, alerts, onSetAlert, onRemove, onSelect, isInitialLoading }: PortfolioTableProps) {
+  const { s } = useLanguage();
+
   if (isInitialLoading) {
     return (
       <div className="rounded-lg border overflow-hidden" style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}>
@@ -37,8 +42,8 @@ export default function PortfolioTable({ rows, alerts, onSetAlert, onRemove, onS
     return (
       <div className="rounded-lg border p-10 text-center" style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}>
         <p style={{ color: "var(--color-text-2)" }}>
-          Henüz hisse eklemedin.{" "}
-          <span style={{ color: "var(--color-accent)" }}>AAPL</span> gibi bir sembol ekle.
+          {s.emptyPortfolio}{" "}
+          <span style={{ color: "var(--color-accent)" }}>AAPL</span>
         </p>
       </div>
     );
@@ -46,16 +51,15 @@ export default function PortfolioTable({ rows, alerts, onSetAlert, onRemove, onS
 
   return (
     <div className="rounded-lg border overflow-hidden" style={{ background: "var(--color-bg-2)", borderColor: "var(--color-line)" }}>
-      {/* Sütun başlıkları */}
       <div
         className={`${GRID} px-4 py-2 border-b`}
         style={{ borderColor: "var(--color-line)" }}
       >
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>Hisse</span>
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>Alış Fiyatı</span>
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>Anlık Fiyat</span>
-        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>Adet</span>
-        <span className="text-xs uppercase tracking-wider text-right" style={{ color: "var(--color-text-3)" }}>Pozisyon</span>
+        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colStock}</span>
+        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colBuyPrice}</span>
+        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colCurrentPrice}</span>
+        <span className="text-xs uppercase tracking-wider" style={{ color: "var(--color-text-3)" }}>{s.colQty}</span>
+        <span className="text-xs uppercase tracking-wider text-right" style={{ color: "var(--color-text-3)" }}>{s.colPosition}</span>
         <span className="text-xs uppercase tracking-wider text-right" style={{ color: "var(--color-text-3)" }}>P&L</span>
         <span className="text-xs text-center" style={{ color: "var(--color-text-3)" }}>🔔</span>
         <span />

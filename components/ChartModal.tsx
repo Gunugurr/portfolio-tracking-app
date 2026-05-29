@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface ChartModalProps {
   symbol: string;
@@ -14,6 +15,7 @@ const DEFAULT_W = 720;
 const DEFAULT_H = 500;
 
 export default function ChartModal({ symbol, name, onClose }: ChartModalProps) {
+  const { s } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -156,7 +158,7 @@ export default function ChartModal({ symbol, name, onClose }: ChartModalProps) {
             {name}
           </span>
           <span className="text-xs ml-2 hidden sm:inline" style={{ color: "var(--color-text-3)" }}>
-            · sürükle / köşeden boyutlandır
+            {s.dragHint}
           </span>
         </div>
         <button

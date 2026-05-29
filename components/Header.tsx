@@ -1,6 +1,10 @@
+"use client";
+
 import { formatTime } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 import ThemeToggle from "@/components/ThemeToggle";
 import Brand from "@/components/Brand";
+import LanguageToggle from "@/components/LanguageToggle";
 
 type Tab = "market" | "portfolio";
 
@@ -23,6 +27,7 @@ interface HeaderProps {
 }
 
 export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, onTabChange, marketStats, countdown, refreshFlash }: HeaderProps) {
+  const { s } = useLanguage();
   return (
     <div>
       <div className="flex items-center justify-between py-5">
@@ -41,7 +46,7 @@ export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, o
             <>
               {lastUpdated && (
                 <span className="text-sm" style={{ color: "var(--color-text-2)" }}>
-                  Son güncelleme: {formatTime(lastUpdated)}
+                  {s.lastUpdated} {formatTime(lastUpdated)}
                 </span>
               )}
               <button
@@ -55,10 +60,11 @@ export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, o
                 }}
               >
                 <span className={isLoading ? "animate-spin" : ""}>↻</span>
-                Yenile
+                {s.refresh}
               </button>
             </>
           )}
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </div>
@@ -74,7 +80,7 @@ export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, o
                 color: activeTab === tab ? "var(--color-orange)" : "var(--color-text-2)",
               }}
             >
-              {tab === "market" ? "Piyasa" : "Portföyüm"}
+              {tab === "market" ? s.tabMarket : s.tabPortfolio}
               {activeTab === tab && (
                 <span
                   className="absolute bottom-0 left-0 right-0 h-0.5"
@@ -86,11 +92,11 @@ export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, o
         </div>
 
         {marketStats && marketStats.total > 0 && (
-          <div className="flex items-center gap-5 pb-2.5 pr-1" title={`S&P 50 büyük hisse özeti (${marketStats.total} hisse)`}>
+          <div className="flex items-center gap-5 pb-2.5 pr-1" title={`S&P 50 (${marketStats.total})`}>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "var(--color-green)" }} />
               <span className="text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--color-text-3)", fontFamily: "var(--font-mono)" }}>
-                Artanlar
+                {s.gainers}
               </span>
               <span className="text-sm font-bold" style={{ color: "var(--color-green)", fontFamily: "var(--font-mono)" }}>
                 {marketStats.gainers}
@@ -99,7 +105,7 @@ export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, o
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "var(--color-red)" }} />
               <span className="text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--color-text-3)", fontFamily: "var(--font-mono)" }}>
-                Azalanlar
+                {s.losers}
               </span>
               <span className="text-sm font-bold" style={{ color: "var(--color-red)", fontFamily: "var(--font-mono)" }}>
                 {marketStats.losers}
@@ -109,7 +115,7 @@ export default function Header({ lastUpdated, onRefresh, isLoading, activeTab, o
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "var(--color-text-3)" }} />
                 <span className="text-xs uppercase tracking-widest font-semibold" style={{ color: "var(--color-text-3)", fontFamily: "var(--font-mono)" }}>
-                  Sabit
+                  {s.unchanged}
                 </span>
                 <span className="text-sm font-bold" style={{ color: "var(--color-text-3)", fontFamily: "var(--font-mono)" }}>
                   {marketStats.unchanged}
