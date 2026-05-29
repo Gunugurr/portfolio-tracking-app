@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(curl -s \"https://query1.finance.yahoo.com/v8/finance/chart/%5ENYAD?interval=1d&range=1d\" -H \"User-Agent: Mozilla/5.0\")",
+      "Bash(curl -s \"https://api.nasdaq.com/api/market-breadth/NYSE?type=advance-decline\" -H \"User-Agent: Mozilla/5.0\" -H \"Accept: application/json\")",
+      "Bash(curl *)",
+      "Bash(npm run *)",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
+      "PowerShell(taskkill *)"
+    ]
+  }
+}
