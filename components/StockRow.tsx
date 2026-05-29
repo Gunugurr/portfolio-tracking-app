@@ -25,7 +25,7 @@ interface StockRowProps {
 }
 
 export const GRID =
-  "grid grid-cols-[160px_110px_110px_70px_110px_110px_32px_32px] items-center gap-3";
+  "grid grid-cols-[160px_110px_110px_70px_110px_110px_56px_32px] items-center gap-3";
 
 function BellIcon({ active }: { active: boolean }) {
   return (
