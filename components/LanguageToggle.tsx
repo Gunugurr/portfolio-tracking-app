@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { Lang } from "@/lib/i18n";
 
-const FLAGS: Record<Lang, string> = {
-  TR: "🇹🇷",
-  EN: "🇺🇸",
-  ES: "🇪🇸",
-  RU: "🇷🇺",
+const FLAG_CLASS: Record<Lang, string> = {
+  TR: "fi fi-tr",
+  EN: "fi fi-us",
+  ES: "fi fi-es",
+  RU: "fi fi-ru",
 };
 
 const NAMES: Record<Lang, string> = {
@@ -45,7 +45,7 @@ export default function LanguageToggle() {
           color: "var(--color-text-2)",
         }}
       >
-        <span className="text-sm leading-none">{FLAGS[lang]}</span>
+        <span className={`${FLAG_CLASS[lang]} fis`} style={{ borderRadius: 2, fontSize: 14 }} />
         <span className="font-mono">{lang}</span>
         <svg
           width="10" height="10" viewBox="0 0 10 10" fill="none"
@@ -85,7 +85,7 @@ export default function LanguageToggle() {
                 if (lang !== l) (e.currentTarget as HTMLElement).style.background = "transparent";
               }}
             >
-              <span className="text-xl leading-none">{FLAGS[l]}</span>
+              <span className={`${FLAG_CLASS[l]}`} style={{ borderRadius: 2, fontSize: 20, width: 28, height: 20, display: "inline-block", backgroundSize: "cover" }} />
               <div className="flex flex-col leading-none gap-0.5">
                 <span className="text-xs font-mono font-bold">{l}</span>
                 <span className="text-xs" style={{ color: "var(--color-text-3)", fontSize: 10 }}>{NAMES[l]}</span>
