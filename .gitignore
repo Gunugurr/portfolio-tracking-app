@@ -1,0 +1,5 @@
+mini-app/node_modules/
+mini-app/.next/
+mini-app/.env.local
+mini-app/.env*.local
+.claude/

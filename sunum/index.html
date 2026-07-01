@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280, initial-scale=1">
+<title>/goal — Claude Code · @esadcom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-primary:    #0D1117;
+  --bg-secondary:  #161B22;
+  --bg-card:       #1C2333;
+  --bg-terminal:   #161B22;
+  --text-primary:  #E6EDF3;
+  --text-muted:    #7D8590;
+  --text-dim:      #484F58;
+  --accent:        #F97316;
+  --accent-light:  #FB923C;
+  --accent-dim:    rgba(249,115,22,0.12);
+  --green:         #3FB950;
+  --red:           #F85149;
+  --yellow:        #D29922;
+  --divider:       #21262D;
+  --font-heading:  'Oswald', 'Barlow Condensed', sans-serif;
+  --font-body:     'Inter', system-ui, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
+  --pad-x: 64px;
+  --pad-y: 48px;
+}
+
+html, body {
+  background: #080C10;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  height: 100vh;
+  overflow: hidden;
+}
+
+body { display: flex; }
+
+.slide-area {
+  flex: 1;
+  position: relative;
+  transition: flex 0.2s;
+}
+body.notes-on .slide-area { flex: 0 0 65%; }
+
+.slide {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-primary);
+  display: none;
+  flex-direction: column;
+  padding: var(--pad-y) var(--pad-x);
+  overflow: hidden;
+}
+.slide.active { display: flex; }
+
+.slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.slide::after {
+  content: '';
+  position: absolute;
+  top: -120px; right: -120px;
+  width: 360px; height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(249,115,22,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.slide > * { position: relative; z-index: 1; }
+
+.brand-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.slide-handle {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+.slide-handle .at { color: var(--accent); }
+
+.progress-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--divider);
+  z-index: 10;
+}
+.progress-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  transition: width 0.2s;
+}
+
+.top-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.category-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(249,115,22,0.25);
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.category-tag.green { color: var(--green); background: rgba(63,185,80,0.1); border-color: rgba(63,185,80,0.25); }
+.category-tag.red { color: var(--red); background: rgba(248,81,73,0.1); border-color: rgba(248,81,73,0.25); }
+.category-tag.muted { color: var(--text-muted); background: rgba(125,133,144,0.08); border-color: var(--divider); }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.title em { font-style: normal; color: var(--accent); }
+.title-sm { font-size: 44px; }
+.title-xl { font-size: 80px; }
+
+.divider {
+  width: 48px;
+  height: 3px;
+  background: var(--accent);
+  margin-bottom: 18px;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 800px;
+  margin-bottom: 8px;
+}
+.subtitle strong { color: var(--text-primary); font-weight: 600; }
+.subtitle em { font-style: normal; color: var(--accent); }
+.subtitle code {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  background: rgba(249,115,22,0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  padding: 20px 22px;
+  position: relative;
+}
+.card .num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.card .ct {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.card .cd {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+.card .cd code {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  background: rgba(249,115,22,0.08);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 12.5px;
+}
+.card.good { border-left: 3px solid var(--green); }
+.card.bad { border-left: 3px solid var(--red); }
+.card.good .num { color: var(--green); }
+.card.bad .num { color: var(--red); }
+
+.bignum {
+  font-family: var(--font-mono);
+  font-size: 88px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.bignum-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.terminal {
+  background: var(--bg-terminal);
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  margin-top: 20px;
+  overflow: hidden;
+  position: relative;
+}
+.terminal-head {
+  background: var(--bg-secondary);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--divider);
+}
+.terminal-head .dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal-head .dot.r { background: #FF5F57; }
+.terminal-head .dot.y { background: #FEBC2E; }
+.terminal-head .dot.g { background: #28C840; }
+.terminal-head .title-bar {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: 12px;
+}
+.terminal-body {
+  padding: 18px 22px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+.terminal-body .c { color: var(--text-dim); }
+.terminal-body .k { color: var(--accent); font-weight: 600; }
+.terminal-body .s { color: var(--green); }
+.terminal-body .r { color: var(--red); }
+.terminal-body .b { color: var(--text-primary); font-weight: 600; }
+
+table.cmp {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 14px;
+}
+table.cmp th, table.cmp td {
+  text-align: left;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--divider);
+}
+table.cmp th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  background: var(--bg-secondary);
+  font-weight: 600;
+}
+table.cmp tr td:first-child {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent);
+}
+table.cmp tr td {
+  color: var(--text-muted);
+}
+table.cmp tr td.hl { color: var(--text-primary); }
+
+.kbd {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--bg-card);
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  padding: 3px 10px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.slide-cover {
+  justify-content: center;
+}
+.slide-cover .cover-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+.slide-cover .title { font-size: 88px; line-height: 1.05; }
+.slide-cover .divider { width: 56px; height: 3px; margin: 20px 0 24px; }
+
+.notes {
+  flex: 0 0 35%;
+  background: #060A0F;
+  border-left: 1px solid var(--divider);
+  padding: 32px 28px;
+  overflow-y: auto;
+  display: none;
+}
+body.notes-on .notes { display: block; }
+.notes h3 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--divider);
+}
+.notes h3 .count { color: var(--accent); font-weight: 700; }
+.notes-body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-primary);
+}
+.notes-body p { margin-bottom: 14px; }
+.notes-body strong { color: var(--accent); font-weight: 600; }
+.notes-body em { color: var(--accent-light); font-style: normal; font-weight: 500; }
+.notes-body code { font-family: var(--font-mono); color: var(--accent); background: rgba(249,115,22,0.08); padding: 1px 6px; border-radius: 3px; font-size: 13px; }
+.notes-body .cue {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--divider);
+  font-weight: 600;
+}
+
+.status {
+  position: fixed;
+  bottom: 14px;
+  right: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  z-index: 100;
+  letter-spacing: 0.06em;
+}
+.status .pn { color: var(--accent); font-weight: 700; }
+.status .hint { opacity: 0.55; }
+
+.kaydir {
+  position: absolute;
+  bottom: 32px;
+  right: 64px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kaydir .arr { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="slide-area">
+
+  <div class="progress-bar"><div class="fill" id="progress" style="width:11%"></div></div>
+
+  <!-- SLIDE 1: COVER -->
+  <section class="slide active slide-cover" data-notes="
+    <p><strong>0:00-0:25 — Hook</strong></p>
+    <p>Selam. Anthropic Claude Code'a yeni bir komut ekledi: <em>/goal</em>.</p>
+    <p>Bu komut tek bir şey yapıyor: <strong>hedef yazıyorsun, Claude hedefe ulaşana kadar durmuyor.</strong> Her adımda kendi kendini kontrol ediyor, bitince duruyor.</p>
+    <p>Bu video 10 dakika. Önce ne olduğunu anlatacağım, sonra <strong>canlı bir hisse portföyü uygulamasını sıfırdan kuracağım</strong>. Tek satır kod yazmadan.</p>
+    <div class='cue'>Sonra geç</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag">Claude Code</span>
+      <span class="category-tag muted">v2.1.139</span>
+    </div>
+    <div class="cover-eyebrow">YENİ KOMUT · /GOAL</div>
+    <h1 class="title">Claude Code artık<br><em>hedefe ulaşana</em><br>kadar durmuyor</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Anthropic bir komut çıkardı. Hedef yazıyorsun, kendi kendini kontrol ederek bitirene kadar koşuyor. <strong>10 dakikada teori + canlı API ile çalışan bir uygulama göstereceğim.</strong></p>
+    <div class="kaydir"><span>Kaydır</span><span class="arr">›</span></div>
+  </section>
+
+  <!-- SLIDE 2: NE YAPIYOR -->
+  <section class="slide" data-notes="
+    <p><strong>0:25-1:30 — Ne yapıyor</strong></p>
+    <p>Önce kısaca anlatayım. <em>/goal</em> komutunu yazıp arkasına bir hedef cümlesi koyuyorsun. Claude o cümleyi okuyor ve hedefi sağlayana kadar çalışmaya başlıyor.</p>
+    <p>Her adımdan sonra <strong>ayrı küçük bir model</strong> (Haiku) hedef sağlandı mı kontrol ediyor. Sağlanmadıysa bir adım daha çalışıyor, kontrolü sana geri vermiyor.</p>
+    <p>Sağlandığında otomatik kapanıyor, geçmişe <em>tamamlandı</em> notu düşüyor.</p>
+    <p>Bu büyük bir yaklaşım değişikliği. Eskiden her adım için tek tek prompt yazıyordun. Şimdi bir hedef yazıyorsun, gerisini Claude planlıyor.</p>
+    <div class='cue'>Sonra: karşılaştırma tablosuna geç</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag">/goal</span>
+      <span class="category-tag muted">ne yapıyor</span>
+    </div>
+    <h1 class="title">Hedef yaz,<br>bitene kadar <em>koşsun</em></h1>
+    <div class="divider"></div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="num">// 01</div>
+        <div class="ct">Hedef koy</div>
+        <div class="cd"><code>/goal X bitince dur</code> yaz, Claude anında çalışmaya başlar. Ayrı prompt yok.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 02</div>
+        <div class="ct">Her adım kontrol</div>
+        <div class="cd">Ayrı bir küçük model hedef sağlandı mı kontrol eder. Sağlanmadıysa bir adım daha.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 03</div>
+        <div class="ct">Otomatik kapanır</div>
+        <div class="cd">Hedef sağlanınca komut kapanır, sana kontrol döner. <code>/goal clear</code> iptal eder.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: KARŞILAŞTIRMA -->
+  <section class="slide" data-notes="
+    <p><strong>1:30-3:00 — Karşılaştırma</strong></p>
+    <p>Anthropic'in <strong>3 otonom modu</strong> var, hepsinin yeri ayrı. Karıştırılır o yüzden bir kerede netleştirelim:</p>
+    <p><strong>/goal</strong> hedef sağlanınca durur. <em>İş tabanlı.</em></p>
+    <p><strong>/loop</strong> belirli zaman geçtikçe yeniden çalışır. <em>Zaman tabanlı.</em></p>
+    <p><strong>Stop hook</strong> kendi yazdığın komut karar verir. <em>Esnek ama setup gerektirir.</em></p>
+    <p><strong>Otomatik mod</strong> izin sorularını otomatize ediyor — tek başına bir adımdan fazlasını çalıştırmıyor.</p>
+    <p>Pro ipucu: <em>/goal + otomatik mod birlikte</em> = tamamen kendi başına çalışıyor.</p>
+    <div class='cue'>Sonra geç</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag">karşılaştırma</span>
+      <span class="category-tag muted">3 otonom mod</span>
+    </div>
+    <h1 class="title title-sm">Hangi durumda <em>hangisi</em></h1>
+    <div class="divider"></div>
+    <table class="cmp">
+      <thead>
+        <tr><th>Yaklaşım</th><th>Sonraki adım başlar</th><th>Durur</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>/goal</td><td class="hl">Önceki adım biter</td><td>Model hedefi onaylar</td></tr>
+        <tr><td>/loop</td><td class="hl">Zaman aralığı geçer</td><td>Sen durdurursun ya da Claude bitti der</td></tr>
+        <tr><td>Stop hook</td><td class="hl">Önceki adım biter</td><td>Kendi komutun karar verir</td></tr>
+        <tr><td>Otomatik mod</td><td class="hl">(sadece izin onayı)</td><td>Claude işi bitti der</td></tr>
+      </tbody>
+    </table>
+    <p class="subtitle" style="margin-top:24px"><em>/goal + otomatik mod</em> birlikte = tamamen kendi başına.</p>
+  </section>
+
+  <!-- SLIDE 4: PATTERN -->
+  <section class="slide" data-notes="
+    <p><strong>3:00-4:00 — En önemli pattern</strong></p>
+    <p>Bunu en başta söylemem lazım çünkü <strong>çoğu kişi yanlış yapacak</strong>:</p>
+    <p><em>Direkt /goal yazma.</em></p>
+    <p>Önce <em>/plan</em> moduna gir. Claude'a ne yapmak istediğini anlat, sana plan çıkarsın. Planı görünce hem sen onayla, hem AI'nın yön kaybetme riski azalır.</p>
+    <p>Sonra <em>/goal</em>'la o planı çalıştırılabilir hale getir.</p>
+    <p><strong>Tanım dokümanı varsa daha güçlü:</strong> küçük bir PRD veya yol haritası yaz. Goal'un içine <code>yol-haritasi.md'deki tüm görevler tamamlanınca dur</code> de.</p>
+    <p>Bu yaklaşım olmadan /goal sınırsız döngüye girer.</p>
+    <div class='cue'>Sonra geç</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag red">DİKKAT</span>
+      <span class="category-tag muted">çoğu kişi atlıyor</span>
+    </div>
+    <h1 class="title">Önce <em>plan</em>,<br>sonra <em>goal</em></h1>
+    <div class="divider"></div>
+    <p class="subtitle">Direkt <code>/goal</code> yazma. Tanım olmadan AI yön kaybeder.</p>
+    <div class="grid-2">
+      <div class="card bad">
+        <div class="num">YANLIŞ</div>
+        <div class="ct">Direkt /goal</div>
+        <div class="cd">"Goal: bir blog uygulaması yap" → Claude rastgele başlar, kapsam belirsiz, sonsuza koşar.</div>
+      </div>
+      <div class="card good">
+        <div class="num">DOĞRU</div>
+        <div class="ct">Plan → Goal</div>
+        <div class="cd"><code>/plan</code> ile önce yol haritası çıkar, sonra <code>/goal yol-haritasi.md'deki tüm görevler tamamlanana kadar çalış</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: KOŞUL YAZMA -->
+  <section class="slide" data-notes="
+    <p><strong>4:00-5:30 — Koşul yazma kuralları</strong></p>
+    <p>Bu kısım kritik. Yanlış koşul = AI ya hiç bitmez ya yanlış noktada durur.</p>
+    <p>Bir koşulda <strong>3 şey</strong> olmalı:</p>
+    <p>1. <strong>Ölçülebilir bitiş hali</strong> — test geçti, build temiz, dosya sayısı, kuyruk boş. Net bir kanıt.</p>
+    <p>2. <strong>Nasıl ispatlanacak</strong> — Claude bunu nasıl gösterecek? <em>npm test 0 dönsün</em>, <em>git status temiz olsun</em>, <em>klasörde 30 dosya var</em>.</p>
+    <p>3. <strong>Sınır</strong> — değişmemesi gereken şeyler. <em>Diğer testleri bozma</em>, <em>node_modules'a dokunma</em>.</p>
+    <p>Tavan koymak için sonuna <strong>ya da 30 adım sonra dur</strong> ekle. Sonsuz döngüden çıkar.</p>
+    <p>Koşul max 4000 karakter — yani genelde bol bol yerin var.</p>
+    <div class='cue'>Sonra: demo'ya geç</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag">koşul</span>
+      <span class="category-tag muted">3 kural</span>
+    </div>
+    <h1 class="title">Bir koşulun<br><em>3 parçası</em></h1>
+    <div class="divider"></div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="num">// 01 · ÖLÇÜLEBİLİR</div>
+        <div class="ct">Net bitiş hali</div>
+        <div class="cd">Test geçti, dosya sayısı, kuyruk boş, build çıkışı 0. Kanıt olmalı.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 02 · NASIL</div>
+        <div class="ct">İspat şekli</div>
+        <div class="cd"><code>npm test</code>, <code>git status</code>, <code>ls outputs/</code> Claude'un göstereceği komut.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 03 · SINIR</div>
+        <div class="ct">Dokunulmayacak</div>
+        <div class="cd">"Diğer testleri bozma", "node_modules'a girme" sınır koy.</div>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top:24px">Tavan koymak için sonuna <span class="kbd">ya da 30 adım sonra dur</span> ekle.</p>
+  </section>
+
+  <!-- SLIDE 6: DEMO BAŞLIK -->
+  <section class="slide" data-notes="
+    <p><strong>5:30-6:30 — Demo intro</strong></p>
+    <p>Şimdi gerçek bir uygulama kuracağız. <em>Portföy takipçisi</em>. Hisse senedi sembolü ekliyorsun, canlı fiyat çekiliyor, kaç adet aldığın ve alış fiyatınla karşılaştırılıyor, kâr/zararını gösteriyor.</p>
+    <p>Stack: Next.js + Finnhub free API. localStorage'da veri kalır, backend yok.</p>
+    <p>Klasöre bakalım. İçinde <em>docs/</em> klasörü var, üç dosya: <strong>PRD.md</strong> (ne yapacağız), <strong>yol-haritasi.md</strong> (38 görev), <strong>tasarim.md</strong> (renk + tipografi). Bir de <em>CLAUDE.md</em> kurallar.</p>
+    <p>Hiç kod yok. Sadece tanımlar.</p>
+    <p>Tek manuel adım: Finnhub'dan ücretsiz API anahtarı alıp .env.local'a yapıştırmak. Sonra /goal'ı çalıştırıyoruz.</p>
+    <p>60 adım tavan koyuyorum çünkü Next.js kurulumu birkaç adım alabilir.</p>
+    <div class='cue'>EKRAN: mini-app klasörüne geç, docs/ göster, .env.local'a key yapıştır, /goal çalıştır (hızlandırılmış)</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag green">CANLI DEMO</span>
+      <span class="category-tag muted">~4 dakika</span>
+    </div>
+    <h1 class="title title-sm">Portföy Takipçisi:<br>canlı API ile <em>gerçek uygulama</em></h1>
+    <div class="divider"></div>
+    <p class="subtitle">Next.js + Finnhub free API. Sembol ekle, canlı fiyat gelir, kâr/zarar hesaplanır. <strong>38 görev, /goal hepsini sırayla yapacak.</strong></p>
+    <div class="terminal">
+      <div class="terminal-head">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="title-bar">~/demo-yt-goal/mini-app</span>
+      </div>
+      <div class="terminal-body"><span class="c">$</span> cd ~/demo-yt-goal/mini-app
+<span class="c">$</span> cp .env.example .env.local  <span class="c"># Finnhub anahtarını yapıştır</span>
+<span class="c">$</span> ls docs/
+PRD.md   yol-haritasi.md   tasarim.md
+<span class="c">$</span> claude --auto
+
+<span class="k">/goal</span> docs/PRD.md ve docs/yol-haritasi.md'yi takip ederek
+portföy takipçisini sıfırdan kur. tasarim.md renk ve tipografi
+için referans. Tüm görevler tamamlanınca ya da 60 adım sonra dur.</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: PRO İPUÇLARI -->
+  <section class="slide" data-notes="
+    <p><strong>~9:30-11:00 — Pro ipuçları</strong></p>
+    <p>Son birkaç şey, ileri seviye kullanım için:</p>
+    <p><strong>1. Terminal'i açık tutmana gerek yok.</strong> <em>claude -p '/goal X'</em> yazarsın, tek seferlik çalışır. Cron'a koyabilirsin. Gece 3'te çalışsın, sabah uyandığında iş bitsin.</p>
+    <p><strong>2. Tavan koy.</strong> Hedefin sonuna <em>ya da 30 adım sonra dur</em> ekle. Sonsuz döngüden çıkar.</p>
+    <p><strong>3. Durum kontrolü.</strong> Sadece <em>/goal</em> yaz (argüman olmadan), o anki durumu gösterir: kaç adım, kaç token, son değerlendirici notu.</p>
+    <p><strong>4. Devam edebilirsin.</strong> Oturum kapanırsa <em>claude --resume</em> ile devam et, aktif hedef geri yüklenir.</p>
+    <div class='cue'>Sonra: kapanış</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag">pro</span>
+      <span class="category-tag muted">4 ipucu</span>
+    </div>
+    <h1 class="title title-sm">İleri seviye <em>kullanım</em></h1>
+    <div class="divider"></div>
+    <div class="grid-2" style="margin-top:20px">
+      <div class="card">
+        <div class="num">// 01</div>
+        <div class="ct">Terminal kapalı</div>
+        <div class="cd"><code>claude -p "/goal ..."</code> tek seferlik. Cron'a koy, gece çalışsın.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 02</div>
+        <div class="ct">Tavan koy</div>
+        <div class="cd">Hedef sonuna <code>ya da 30 adım sonra dur</code>. Sonsuz döngüden çık.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 03</div>
+        <div class="ct">Durum gör</div>
+        <div class="cd">Sadece <code>/goal</code> yaz: adım, token, değerlendirici notu.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 04</div>
+        <div class="ct">Devam et</div>
+        <div class="cd"><code>claude --resume</code> ile aktif hedef geri yüklenir.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 9: KAPANIŞ -->
+  <section class="slide" data-notes="
+    <p><strong>11:00-12:00 — Kapanış</strong></p>
+    <p>Özet: <em>/goal</em> Claude Code'a otonom adımlama yetisi ekliyor. Sen bir hedef yazıyorsun, Claude hedefe ulaşana kadar durmuyor.</p>
+    <p>Üç şeyi unutma:</p>
+    <p>1. <strong>Önce plan, sonra goal.</strong></p>
+    <p>2. <strong>Koşulda ölçülebilir bitiş hali olsun.</strong></p>
+    <p>3. <strong>Tavan koy</strong> (ya da N adım sonra dur).</p>
+    <p>Demo klasörünü açıklamada paylaşıyorum, indirip aynısını çalıştırabilirsin.</p>
+    <p>Anthropic dokümantasyon linkini açıklamaya bıraktım. Bir şey denersen yoruma yaz.</p>
+    <p><strong>Görüşürüz.</strong></p>
+    <div class='cue'>Bitir</div>
+  ">
+    <div class="brand-bar">
+      <div></div>
+      <div class="slide-handle">@<span class="at">esadcom</span></div>
+    </div>
+    <div class="top-line">
+      <span class="category-tag red">özet</span>
+      <span class="category-tag muted">3 madde</span>
+    </div>
+    <h1 class="title">Üç şeyi <em>unutma</em></h1>
+    <div class="divider"></div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="num">// 01</div>
+        <div class="ct">Plan → Goal</div>
+        <div class="cd">Direkt goal yazma. Önce /plan, sonra /goal.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 02</div>
+        <div class="ct">Ölçülebilir bitiş</div>
+        <div class="cd">Net kanıt: test geçti, dosya sayısı, kuyruk boş.</div>
+      </div>
+      <div class="card">
+        <div class="num">// 03</div>
+        <div class="ct">Tavan koy</div>
+        <div class="cd"><code>ya da 30 adım sonra dur</code>. Sonsuz döngüden çık.</div>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top:32px">Demo klasörü + dokümantasyon linki açıklamada. Bir şey denersen yoruma yaz.<br><strong>Görüşürüz.</strong></p>
+  </section>
+
+</div>
+
+<aside class="notes" id="notes">
+  <h3>SUNUCU NOTLARI <span class="count"><span id="cn">1</span> / <span id="tn">8</span></span></h3>
+  <div class="notes-body" id="notesBody"></div>
+</aside>
+
+<div class="status">
+  <span class="hint">N: notlar · ←/→: gez · F: tam ekran</span>
+  <span><span class="pn" id="cur">1</span> / <span id="tot">8</span></span>
+</div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  function renderNotes() {
+    const n = slides[cur].dataset.notes || '';
+    document.getElementById('notesBody').innerHTML = n;
+    document.getElementById('cn').textContent = cur + 1;
+    document.getElementById('tn').textContent = total;
+  }
+
+  function go(idx) {
+    cur = Math.max(0, Math.min(total - 1, idx));
+    slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+    document.getElementById('cur').textContent = cur + 1;
+    document.getElementById('tot').textContent = total;
+    document.getElementById('progress').style.width = ((cur + 1) / total * 100) + '%';
+    renderNotes();
+    if (history.replaceState) history.replaceState(null, '', '#' + (cur + 1));
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); }
+    else if (e.key === 'End') { e.preventDefault(); go(total - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+    else if (e.key === 'n' || e.key === 'N') {
+      document.body.classList.toggle('notes-on');
+    }
+  });
+
+  const hash = parseInt(location.hash.slice(1));
+  go(hash > 0 && hash <= total ? hash - 1 : 0);
+
+  document.body.classList.add('notes-on');
+})();
+</script>
+
+</body>
+</html>
